@@ -128,6 +128,15 @@ export class AgentManager {
     const res = await this.driver.exec(handle, tmux.newSession({ name: id, cwd: sandbox.workdir, command, envFile }));
     if (res.exitCode !== 0) throw new CocoonError('internal', t('error.agentStartFailed', { error: res.stderr.trim() }));
 
+    // The CLI's own hook reports only once its UI is up. Until then a quiet screen would count as "done" (see
+    // StatusDetector), and the task would act on a result nobody has written yet. The report is stale after 15 s of
+    // quiet screen anyway, so a hook that never speaks cannot keep an agent "working".
+    if (profile.hooks) {
+      await this.driver
+        .exec(handle, [tmux.STATUS_BIN, 'working'], { env: { COCOON_AGENT_ID: id } })
+        .catch((err) => this.log(`initial status report for agent ${id} failed`, err));
+    }
+
     const now = new Date().toISOString();
     const record: AgentRecord = {
       id,

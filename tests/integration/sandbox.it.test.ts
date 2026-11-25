@@ -56,6 +56,17 @@ describe.runIf(available)('sandbox lifecycle, files, agents and egress', () => {
     await waitFor('agent exit', async () => (await rpc('agent.get', { agentId: agent.id })).status === 'exited', 30_000);
   });
 
+  it('reports "working" for a hook-based agent before its CLI says anything', async () => {
+    // The CLI's own hook speaks only once its UI is up; until then a quiet screen would count as "done".
+    const agent = await rpc('agent.spawn', { sandboxId: id, kind: 'claude-code' });
+    try {
+      const res = await sh(id, `cat /opt/cocoon/status/${agent.id}`);
+      expect(res.stdout.trim()).toMatch(/^working \d+$/);
+    } finally {
+      await rpc('agent.kill', { agentId: agent.id }).catch(() => undefined);
+    }
+  });
+
   it('restricted network: allowlisted hosts work, everything else is blocked by the egress proxy', async () => {
     const allowed = await sh(id, 'curl -s -o /dev/null -w "%{http_code}" --max-time 20 https://github.com');
     expect(['200', '301', '302']).toContain(allowed.stdout.trim());
