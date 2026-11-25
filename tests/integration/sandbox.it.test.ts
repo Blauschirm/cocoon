@@ -67,6 +67,13 @@ describe.runIf(available)('sandbox lifecycle, files, agents and egress', () => {
     }
   });
 
+  it('installs the OpenCode status plugin for new sandboxes', async () => {
+    const res = await sh(id, 'cat ~/.config/opencode/plugins/cocoon-status.ts');
+    expect(res.exitCode).toBe(0);
+    expect(res.stdout).toContain('node:child_process');
+    expect(res.stdout).toContain("'session.idle'");
+  });
+
   it('restricted network: allowlisted hosts work, everything else is blocked by the egress proxy', async () => {
     const allowed = await sh(id, 'curl -s -o /dev/null -w "%{http_code}" --max-time 20 https://github.com');
     expect(['200', '301', '302']).toContain(allowed.stdout.trim());

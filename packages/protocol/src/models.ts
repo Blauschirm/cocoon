@@ -206,7 +206,7 @@ export const AgentProfile = z.object({
   /** Skills installed for this agent type at start: GitHub references like "owner/repo", "owner/repo/path@ref". */
   skills: z.array(z.string()).default([]),
   /** Installs native status hooks into the agent CLI so it reports its own status. */
-  hooks: z.enum(['claude-code', 'codex']).optional(),
+  hooks: z.enum(['claude-code', 'codex', 'opencode']).optional(),
   /** Regexes matched against the bottom of the screen. */
   workingPatterns: z.array(z.string()).default([]),
   blockedPatterns: z.array(z.string()).default([]),
@@ -273,6 +273,7 @@ export const DEFAULT_PROFILES: Record<string, AgentProfile> = {
     adapter: 'opencode',
     tool: 'opencode',
     secrets: ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GITHUB_TOKEN'],
+    hooks: 'opencode',
     workingPatterns: ['esc interrupt', 'esc to interrupt'],
     blockedPatterns: [...commonBlocked, 'Allow once', 'Permission required'],
   }),

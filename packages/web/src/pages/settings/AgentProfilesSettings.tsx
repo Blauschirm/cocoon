@@ -44,7 +44,7 @@ interface ProfileDraft {
   commandText: string;
   promptMode: 'arg' | 'input';
   secrets: string[];
-  hooks: '' | 'claude-code' | 'codex';
+  hooks: '' | 'claude-code' | 'codex' | 'opencode';
   env: KeyValueRow[];
   workingPatterns: string;
   blockedPatterns: string;
@@ -598,6 +598,7 @@ function ProfileForm({
             <option value="">{t('profiles.form.hooksNone')}</option>
             <option value="claude-code">Claude Code</option>
             <option value="codex">OpenAI Codex</option>
+            <option value="opencode">OpenCode</option>
           </Select>
         </Field>
 

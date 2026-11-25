@@ -72,7 +72,7 @@ it too. The design is inspired by [herdr](https://vercel.com/docs/sandbox/ecosys
 | **Custom APIs** | Bring your own model endpoint (Anthropic- or OpenAI-compatible: company gateway, LiteLLM, OpenRouter, Ollama, DeepSeek, …) or give agents access to any HTTP API, with model selection and connection test |
 | **Previews & ports** | Servers that agents start (dev servers, APIs, docs) are detected automatically and can be opened as an authenticated **preview** in the browser or **shared** on the network – WebSockets/HMR included |
 | **Shared services** | One click starts **PostgreSQL, MySQL/MariaDB, MongoDB, Redis** or the mocks **WireMock** (HTTP APIs) and **Mailpit** (email) for all sandboxes – or connects your own server. Every sandbox gets its own database and user; agents get the connection as env vars and may create schemas and test databases freely |
-| **Agent status** | `working` / `blocked` / `done` / `idle` / `exited`, from native hooks (Claude Code, Codex) plus screen heuristics |
+| **Agent status** | `working` / `blocked` / `done` / `idle` / `exited`, from native hooks (Claude Code, Codex, OpenCode) plus screen heuristics |
 | **Persistence** | Agents run in tmux inside the sandbox – they survive control-plane restarts and client disconnects |
 | **Results** | Changes leave the sandbox only as a git patch, a download, or a pushed branch + GitHub pull request |
 | **Integrations** | CLI, typed TypeScript client, REST/RPC, WebSocket events, MCP server |
@@ -680,7 +680,7 @@ Built-in types (editable, resettable). The CLIs live in the shared toolbox – i
 |---|---|---|---|
 | `claude-code` | `claude` (`@anthropic-ai/claude-code`) | Anthropic Messages – or any chat server via translation | status hooks, onboarding/trust dialogs skipped |
 | `codex` | `codex` (`@openai/codex`) | OpenAI Responses – or any chat server via translation | `notify` hook, workspace trusted, runs with `--sandbox danger-full-access` (CoCoon isolates) |
-| `opencode` | `opencode` (`opencode-ai`) | Chat / Messages / Responses natively | config passed via `OPENCODE_CONFIG_CONTENT`, `-m cocoon/<model>` |
+| `opencode` | `opencode` (`opencode-ai`) | Chat / Messages / Responses natively | status plugin, config passed via `OPENCODE_CONFIG_CONTENT`, `-m cocoon/<model>` |
 | `pi` | `pi` (`@earendil-works/pi-coding-agent`) | Chat / Messages / Responses natively | provider written to `~/.pi/agent/models.json`, `--provider cocoon --model …` |
 | `qwen-code` | `qwen` (`@qwen-code/qwen-code`) | Chat natively | `OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL`, `-m` |
 | `gemini` | `gemini` (`@google/gemini-cli`) | – (Gemini API key only) | |
@@ -751,7 +751,8 @@ llama.cpp-based server (chat only) and Claude Code, Codex, OpenCode and Pi. Exam
 
 Two sources, reported as `statusSource`:
 1. **Hooks** – installed into each sandbox: Claude Code hooks in `~/.claude/settings.json` (`UserPromptSubmit`/`PreToolUse`/`PostToolUse`
-   → working, `Notification[permission_prompt]` → blocked, `Stop` → done) and Codex `notify` in `~/.codex/config.toml` (→ done).
+   → working, `Notification[permission_prompt]` → blocked, `Stop` → done), Codex `notify` in `~/.codex/config.toml` (→ done), and an
+   OpenCode plugin in `~/.config/opencode/plugins/cocoon-status.ts` (`session.status` → working/done, `session.idle` → done).
    They write to `/opt/cocoon/status/<agentId>` – no network access to the control plane needed.
 2. **Heuristics** – a poller takes one snapshot per sandbox per second (tmux state, foreground process, screen): changing screen →
    working; quiet with a permission prompt visible → blocked; quiet after a task → done.

@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { planRepos, type MethodParams, type RepoSource, type Sandbox, type SandboxRepo } from '@cocoon/protocol';
 import { agentNotesScript } from '../agents/notes.ts';
-import { CLAUDE_SETTINGS, CODEX_NOTIFY, claudeStateSeed, installHooksScript } from '../agents/hooks.ts';
+import { CLAUDE_SETTINGS, CODEX_NOTIFY, OPENCODE_STATUS_PLUGIN, claudeStateSeed, installHooksScript } from '../agents/hooks.ts';
 import { sharedDirsScript, STATUS_BIN, STATUS_SCRIPT, TMUX_CONF, TMUX_CONF_PATH } from '../agents/tmux.ts';
 import type { EgressManager } from '../egress.ts';
 import { CocoonError, notFound } from '../errors.ts';
@@ -255,7 +255,7 @@ export class SandboxManager {
       NAME: git.authorName,
       EMAIL: git.authorEmail,
     });
-    await run(installHooksScript, { CLAUDE_SETTINGS, CLAUDE_STATE: claudeStateSeed(record.workdir), CODEX_NOTIFY });
+    await run(installHooksScript, { CLAUDE_SETTINGS, CLAUDE_STATE: claudeStateSeed(record.workdir), CODEX_NOTIFY, OPENCODE_PLUGIN: OPENCODE_STATUS_PLUGIN });
 
     const repos = reposOf(record);
     if (!repos.length) {
